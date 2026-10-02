@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NOVA AI Command Center</title>
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--c:#27a8ff;--c2:#56d4ff;--bg:#020a18;--p:#06142b;--l:#12457f;--t:#e6f3ff;--m:#7fa6cc;--g:#2ee59d;color-scheme:dark}
+html,body{height:100%;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{height:100dvh;display:grid;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px));grid-template-columns:180px 1fr 270px;grid-template-rows:64px 1fr 70px;grid-template-areas:"top top top" "side main right" "bot bot bot";background:radial-gradient(900px 500px at 50% 0,#0a2a5a55,transparent),var(--bg)}
+.box{background:linear-gradient(180deg,#071a38cc,#040f22cc);border:1px solid var(--l);border-radius:14px;box-shadow:0 0 22px #27a8ff22,inset 0 0 24px #27a8ff0d}
+.top{grid-area:top;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 16px;gap:10px}
+.clock b{font-size:22px;letter-spacing:.04em}.clock small{display:block;color:var(--m);font-size:11px;margin-top:-4px}
+.brand{text-align:center}.brand h1{font:700 30px/1 system-ui;letter-spacing:.35em;color:#fff;text-shadow:0 0 18px var(--c);padding-left:.35em}.brand small{letter-spacing:.3em;font-size:10px;color:var(--c2)}
+.tr{display:flex;justify-content:flex-end;gap:14px;align-items:center;font-size:11px;color:var(--m);letter-spacing:.1em}
+.on{color:var(--g);font-weight:700;letter-spacing:.12em}.on:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor;margin-right:7px}
+.off{color:#ff9d4d}
+.gear{background:none;border:0;font-size:22px}
+.modes{font-size:11px;letter-spacing:.2em;color:var(--m);margin-top:3px}
+.side{grid-area:side;padding:14px 10px;display:flex;flex-direction:column;gap:6px;overflow:auto}
+.core{width:96px;height:96px;margin:0 auto 10px;border-radius:50%;background:radial-gradient(circle,#fff 0 7%,#7fdcff 14%,#1a7fe0 34%,#06306a 56%,transparent 58%);box-shadow:0 0 30px var(--c),inset 0 0 20px var(--c);border:2px solid #2a8be0;animation:pulse 3s infinite}
+@keyframes pulse{50%{box-shadow:0 0 50px var(--c2),inset 0 0 30px var(--c)}}
+.nav{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:none;border:1px solid transparent;text-align:left;font-size:12px;letter-spacing:.15em;color:var(--m)}
+.nav i{font-style:normal;font-size:20px;width:26px;text-align:center}
+.nav.act{background:#0d2b57;border-color:var(--c);color:#fff;box-shadow:0 0 16px #27a8ff44}
+.sys{margin-top:auto;font-size:10px;color:var(--m);letter-spacing:.1em;padding:8px}.sys b{display:block;color:var(--c2)}
+.main{grid-area:main;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.pn{display:none;flex:1;flex-direction:column;min-height:0;padding:16px;position:relative}.pn.show{display:flex}
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.hn{display:flex;align-items:center;gap:12px}
+.orb{width:40px;height:40px;border-radius:50%;flex:none;background:radial-gradient(circle,#fff 0 10%,#4cc3ff 25%,#0b4aa0 60%);box-shadow:0 0 14px var(--c);border:2px solid #2a8be0}
+.hn h2{font-size:20px;letter-spacing:.2em}.hn small{color:var(--m);letter-spacing:.2em;font-size:11px}
+.stbox{font-size:11px;letter-spacing:.15em;color:#4e7aa6;line-height:1.5;padding:8px 14px;border:1px solid var(--l);border-radius:10px;min-width:150px}
+.stbox span.a{color:var(--c2)}
+.msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:4px 4px 10px;min-height:0;position:relative;z-index:1}
+.m{display:flex;gap:10px;max-width:82%}.m.u{align-self:flex-end;flex-direction:row-reverse}
+.bub{background:#0b2145;border:1px solid var(--l);border-radius:14px;padding:10px 14px}
+.m.u .bub{background:#0d3a7a;border-color:#2a8be0}
+.bub b{display:block;color:var(--c2);font-size:11px;letter-spacing:.15em;margin-bottom:2px}
+.bub small{display:block;color:var(--m);font-size:11px;margin-top:4px}
+.bub code{background:#00000055;padding:1px 5px;border-radius:5px}
+.dots span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--c2);animation:bl 1s infinite}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bl{50%{opacity:.2}}
+#globe{position:absolute;right:-70px;bottom:40px;width:420px;height:420px;opacity:.55;pointer-events:none}
+.bar{display:flex;gap:12px;align-items:center;margin-top:10px;position:relative;z-index:1}
+.mic{width:54px;height:54px;border-radius:50%;flex:none;background:#06214a;border:2px solid var(--c);font-size:22px;box-shadow:0 0 18px #27a8ff66}
+.mic.rec{background:#0d4a9a;animation:pulse 1s infinite}
+.inp{flex:1;display:flex;align-items:center;border:1px solid var(--c);border-radius:30px;background:#041229;padding:6px 8px 6px 18px;box-shadow:0 0 16px #27a8ff33}
+.inp input{flex:1;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:16px;min-width:0}
+.sp{background:none;border:0;font-size:18px;opacity:.5;margin-right:6px}.sp.on2{opacity:1}
+.send{width:42px;height:42px;border-radius:50%;border:0;background:linear-gradient(135deg,#1a8cff,#0a5fd0);font-size:18px}
+.right{grid-area:right;display:flex;flex-direction:column;gap:12px;overflow:auto}
+.card{padding:14px}.card h3{font-size:13px;letter-spacing:.14em;margin-bottom:10px}
+.qc{display:flex;justify-content:space-between;width:100%;padding:11px 12px;margin-bottom:8px;background:#061a3a;border:1px solid var(--l);border-radius:10px;font-size:13px;text-align:left}.qc:hover{border-color:var(--c)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #12335a;font-size:12px;letter-spacing:.06em}
+.ok{color:var(--g);font-size:11px}.sb{color:var(--c);font-size:11px}.bad{color:#ff9d4d;font-size:11px}
+.quote{font-size:13px;color:var(--m);font-style:italic}.quote b{display:block;margin-top:8px;font-style:normal;color:var(--c2);font-size:12px}
+.bot{grid-area:bot;display:grid;grid-template-columns:240px 1fr 220px;gap:12px;align-items:center;padding:0 16px}
+.mem small{font-size:11px;letter-spacing:.1em;color:var(--m)}.mem div{height:6px;background:#0c2447;border-radius:6px;margin-top:6px;overflow:hidden}.mem div i{display:block;height:100%;background:var(--c);width:0;transition:.4s;box-shadow:0 0 8px var(--c)}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.chip{background:#061a3a;border:1px solid var(--l);border-radius:10px;padding:8px 14px;font-size:13px}.chip.act{border-color:var(--c);background:#0d2b57;box-shadow:0 0 12px #27a8ff55}
+.wv{display:flex;align-items:center;gap:10px;justify-content:flex-end;font-size:11px;letter-spacing:.14em;color:var(--m)}
+.wv div{display:flex;align-items:center;gap:3px;height:34px}.wv div i{width:3px;background:var(--c);border-radius:2px;height:6px;animation:wv 1.4s infinite ease-in-out}
+.wv.go div i{animation-duration:.5s}
+@keyframes wv{50%{height:30px}}
+.fld{display:block;margin-bottom:14px;font-size:12px;letter-spacing:.1em;color:var(--m)}
+.fld input[type=text],.fld input[type=password]{display:block;width:100%;margin-top:6px;padding:12px;border-radius:10px;border:1px solid var(--l);background:#041229;color:#fff;font:inherit;font-size:15px}
+.btn{background:linear-gradient(135deg,#1a8cff,#0a5fd0);border:0;border-radius:10px;padding:11px 20px;color:#fff;margin-right:8px}.btn.g{background:#0b2145;border:1px solid var(--l)}
+.tl{overflow:auto;flex:1;margin-top:12px}.task{display:flex;gap:12px;align-items:center;padding:12px;border-bottom:1px solid #12335a}.task.d span{text-decoration:line-through;opacity:.5}.task span{flex:1}.task button{background:none;border:0;font-size:18px}
+@media(max-width:1100px){#app{grid-template-columns:76px 1fr;grid-template-areas:"top top" "side main" "bot bot"}.right{display:none}.nav span{display:none}.core{width:50px;height:50px}.sys{display:none}.bot{grid-template-columns:150px 1fr 120px}.wv span{display:none}}
+@media(max-width:700px){#app{grid-template-columns:56px 1fr;grid-template-rows:56px 1fr 56px}.top{padding:0 8px}.tr .tg,.modes,.clock small{display:none}.brand h1{font-size:20px}.nav{padding:8px 4px;justify-content:center}.bot{grid-template-columns:1fr}.mem,.wv{display:none}.chips{flex-wrap:nowrap;overflow:auto;justify-content:flex-start}.m{max-width:94%}.stbox{display:none}}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="top box">
+<div class="clock"><b id="clk">00:00</b><small id="dt"></small></div>
+<div class="brand"><h1 id="nm">NOVA</h1><small>AI COMMAND CENTER</small><div class="modes">THINK / PLAN / EXECUTE</div></div>
+<div class="tr"><span class="tg">YOUR IDEAS. MY POWER.</span><span class="on" id="onl">ONLINE</span><button class="gear" id="gear" aria-label="Settings">&#9881;</button></div>
+</header>
+
+<nav class="side box">
+<div class="core"></div>
+<button class="nav act" data-p="chat"><i>&#128172;</i><span>CHAT</span></button>
+<button class="nav" data-p="tasks"><i>&#9745;</i><span>TASKS</span></button>
+<button class="nav" data-p="soon" data-t="FILES"><i>&#128193;</i><span>FILES</span></button>
+<button class="nav" data-p="soon" data-t="BROWSER"><i>&#127760;</i><span>BROWSER</span></button>
+<button class="nav" data-p="soon" data-t="TOOLS"><i>&#128295;</i><span>TOOLS</span></button>
+<button class="nav" data-p="settings"><i>&#9881;</i><span>SETTINGS</span></button>
+<div class="sys"><b>SYSTEMS</b>ALL SYSTEMS NOMINAL</div>
+</nav>
+
+<main class="main box">
+<section class="pn show" id="p-chat">
+<canvas id="globe" width="420" height="420"></canvas>
+<div class="head"><div class="hn"><div class="orb"></div><div><h2 id="nm2">NOVA</h2><small>AI ASSISTANT</small></div></div>
+<div class="stbox"><div id="st">READY.</div><div style="color:#4e7aa6">LISTENING / ANALYZING</div></div></div>
+<div class="msgs" id="msgs"></div>
+<div class="bar"><button class="mic" id="mic" aria-label="Voice input">&#127908;</button>
+<div class="inp"><input id="in" placeholder="Give NOVA a command..." autocomplete="off"><button class="sp" id="spk" title="Spoken replies" aria-label="Spoken replies">&#128266;</button><button class="send" id="snd" aria-label="Send">&#10148;</button></div></div>
+</section>
+
+<section class="pn" id="p-tasks"><div class="head"><div class="hn"><div class="orb"></div><div><h2>TASKS</h2><small>YOUR TO DO LIST</small></div></div></div>
+<div class="inp"><input id="ti" placeholder="Add a task and press Enter" autocomplete="off"></div><div class="tl" id="tl"></div></section>
+
+<section class="pn" id="p-settings"><div class="head"><div class="hn"><div class="orb"></div><div><h2>SETTINGS</h2><small>CONNECT YOUR AI</small></div></div></div>
+<div style="overflow:auto">
+<label class="fld">ANTHROPIC API KEY (OPTIONAL)<input type="password" id="key" placeholder="sk-ant-..." autocomplete="off"></label>
+<label class="fld">MODEL<input type="text" id="mdl"></label>
+<label class="fld">ASSISTANT NAME<input type="text" id="nmi"></label>
+<p style="color:var(--m);font-size:13px;margin-bottom:16px">Without a key, NOVA runs in local mode with built in knowledge, plus free lookups for weather, definitions and Wikipedia. Add a key for full Claude AI. Your key stays on this device in the browser and is only sent to Anthropic. Do not share this file or page with your key saved in it.</p>
+<button class="btn" id="save">Save</button><button class="btn g" id="clr">Clear chat memory</button></div></section>
+
+<section class="pn" id="p-soon"><div class="head"><div class="hn"><div class="orb"></div><div><h2 id="sn">MODULE</h2><small>NOT CONNECTED YET</small></div></div></div>
+<p style="color:var(--m)">This module is a placeholder. It is ready to be connected to your own tools, files or browser automation in a later version.</p></section>
+</main>
+
+<aside class="right">
+<div class="card box"><h3>&#9889; QUICK COMMANDS</h3>
+<button class="qc" data-q="What can you do?">What can you do? <span>&rsaquo;</span></button>
+<button class="qc" data-q="Help me plan my day. Ask me what I need to get done.">Plan my day <span>&rsaquo;</span></button>
+<button class="qc" data-q="Explain how AI works in simple words.">Explain AI <span>&rsaquo;</span></button></div>
+<div class="card box"><h3>&#9889; SYSTEM STATUS</h3>
+<div class="row">AI CORE<span id="s1" class="ok">ONLINE</span></div>
+<div class="row">VOICE INPUT<span id="s2" class="ok">READY</span></div>
+<div class="row">VOICE REPLY<span id="s3" class="sb">OFF</span></div>
+<div class="row">TOOLS<span class="sb">STANDBY</span></div></div>
+<div class="card box quote">"Ideas become reality the moment you act on them."<b>NOVA</b></div>
+</aside>
+
+<footer class="bot box">
+<div class="mem"><small>MEMORY <span id="mp">0%</span></small><div><i id="mb"></i></div></div>
+<div class="chips" id="chips"></div>
+<div class="wv" id="wv"><div></div><span id="wl">STANDBY</span></div>
+</footer>
+</div>
+
+<script>
+var CFG={name:"NOVA",model:"claude-sonnet-5-5",
+sys:"You are NOVA, a smart, calm and capable personal AI assistant, in the style of a futuristic command center. Reply clearly and concisely, usually in 1 to 4 short sentences unless the user asks for detail. Your replies may be spoken aloud, so avoid long lists and heavy formatting."};
+var $=function(i){return document.getElementById(i)},ls=localStorage;
+function get(k,d){try{var v=ls.getItem(k);return v===null?d:v}catch(e){return d}}
+function put(k,v){try{ls.setItem(k,v)}catch(e){}}
+var key=get("nova_key",""),model=get("nova_model",CFG.model),name=get("nova_name",CFG.name),speakOn=get("nova_speak","0")==="1",mode="",busy=false;
+var hist=[];try{hist=JSON.parse(get("nova_hist","[]"))}catch(e){}
+var tasks=[];try{tasks=JSON.parse(get("nova_tasks","[]"))}catch(e){}
+
+function nameUI(){["nm","nm2"].forEach(function(i){$(i).textContent=name.toUpperCase()});$("in").placeholder="Give "+name+" a command..."}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function fmt(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b style='display:inline;color:#fff;font-size:inherit;letter-spacing:0'>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>").replace(/\n/g,"<br>")}
+function tm(){return new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}
+function add(role,text){
+var d=document.createElement("div");d.className="m "+(role==="user"?"u":"");
+d.innerHTML=(role==="user"?"":"<div class='orb'></div>")+"<div class='bub'><b>"+(role==="user"?"YOU":name.toUpperCase())+"</b><div class='tx'>"+fmt(text)+"</div><small>"+tm()+"</small></div>";
+$("msgs").appendChild(d);$("msgs").scrollTop=1e9;return d}
+function state(s){
+var map={ready:["READY.","STANDBY"],listen:["LISTENING...","LISTENING"],think:["ANALYZING...","PROCESSING"],speak:["RESPONDING...","SPEAKING"]};
+$("st").textContent=map[s][0];$("wl").textContent=map[s][1];$("wv").className="wv"+(s==="ready"?"":" go")}
+function status(){
+$("s1").textContent=key?"CLAUDE AI":"LOCAL";$("s1").className="ok";
+$("onl").textContent="ONLINE";$("onl").className="on";
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+$("s2").textContent=SR?"READY":"UNSUPPORTED";$("s2").className=SR?"ok":"bad";
+$("s3").textContent=speakOn?"ON":"OFF";$("s3").className=speakOn?"ok":"sb";$("spk").className="sp"+(speakOn?" on2":"")}
+function mem(){var p=Math.min(100,Math.round(JSON.stringify(hist).length/800));$("mp").textContent=p+"%";$("mb").style.width=p+"%"}
+function say(t){if(!speakOn||!window.speechSynthesis)return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t.replace(/[*`#]/g,""));u.onstart=function(){state("speak")};u.onend=function(){state("ready")};speechSynthesis.speak(u)}
+
+
+/* ===== LOCAL BRAIN: works with no API key ===== */
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+var JOKES=["Why do programmers prefer dark mode? Because light attracts bugs.","Why did the developer go broke? He used up all his cache.","There are 10 kinds of people in the world: those who understand binary and those who do not.","A SQL query walks into a bar, walks up to two tables and asks: can I join you?","Why do Java developers wear glasses? Because they do not C sharp.","I would tell you a UDP joke, but you might not get it.","Why did the scarecrow win an award? He was outstanding in his field.","What do you call fake spaghetti? An impasta.","Why can not you trust atoms? They make up everything.","Why was the computer cold? It left its Windows open.","I asked my phone for a joke. It said, check your battery percentage.","Why did the smartphone need glasses? It lost all its contacts."];
+var FACTS=["Honey never spoils. Edible honey has been found in ancient Egyptian tombs.","An octopus has three hearts and blue blood.","A day on Venus is longer than its year.","Bananas are berries, but strawberries are not.","Light from the Sun takes about 8 minutes to reach Earth.","Sharks are older than trees.","Your brain uses about 20 percent of your body's energy.","Jupiter is more than twice as massive as all the other planets combined.","The Eiffel Tower grows a few centimetres taller in summer because heat expands the metal.","An adult human has 206 bones.","Wombats produce cube shaped droppings.","A group of flamingos is called a flamboyance.","Mount Everest grows slightly taller each year because of tectonic movement.","There are more possible chess games than atoms in the observable universe.","Lightning is about five times hotter than the surface of the Sun."];
+var QUOTES=["Small steps every day lead to big results.","Discipline is choosing what you want most over what you want right now.","You do not have to be great to start, but you have to start to be great.","Focus on progress, not perfection.","The expert in anything was once a beginner.","Done is better than perfect.","Energy flows where attention goes.","Make it work, make it right, then make it fast."];
+var RIDDLES=[["What has keys but cannot open locks?","A keyboard."],["What gets wetter the more it dries?","A towel."],["What has hands but cannot clap?","A clock."],["What can travel around the world while staying in a corner?","A stamp."],["What has a head and a tail but no body?","A coin."]];
+var CAP={};"India:New Delhi,United States:Washington D.C.,USA:Washington D.C.,United Kingdom:London,UK:London,France:Paris,Germany:Berlin,Italy:Rome,Spain:Madrid,Japan:Tokyo,China:Beijing,Russia:Moscow,Canada:Ottawa,Australia:Canberra,Brazil:Brasilia,Mexico:Mexico City,Argentina:Buenos Aires,Egypt:Cairo,South Africa:Pretoria,Nigeria:Abuja,Kenya:Nairobi,Pakistan:Islamabad,Bangladesh:Dhaka,Sri Lanka:Colombo,Nepal:Kathmandu,Bhutan:Thimphu,Afghanistan:Kabul,Iran:Tehran,Iraq:Baghdad,Saudi Arabia:Riyadh,UAE:Abu Dhabi,United Arab Emirates:Abu Dhabi,Turkey:Ankara,Greece:Athens,Portugal:Lisbon,Netherlands:Amsterdam,Belgium:Brussels,Switzerland:Bern,Austria:Vienna,Sweden:Stockholm,Norway:Oslo,Denmark:Copenhagen,Finland:Helsinki,Poland:Warsaw,Ukraine:Kyiv,Ireland:Dublin,South Korea:Seoul,North Korea:Pyongyang,Thailand:Bangkok,Vietnam:Hanoi,Indonesia:Jakarta,Malaysia:Kuala Lumpur,Singapore:Singapore,Philippines:Manila,New Zealand:Wellington,Chile:Santiago,Peru:Lima,Colombia:Bogota,Cuba:Havana,Israel:Jerusalem,Qatar:Doha,Myanmar:Naypyidaw,Ethiopia:Addis Ababa,Ghana:Accra".split(",").forEach(function(x){var a=x.split(":");CAP[a[0].toLowerCase()]=[a[0],a[1]]});
+var SITES={youtube:"https://www.youtube.com",google:"https://www.google.com",gmail:"https://mail.google.com",maps:"https://maps.google.com",wikipedia:"https://www.wikipedia.org",github:"https://github.com",whatsapp:"https://web.whatsapp.com",instagram:"https://www.instagram.com",reddit:"https://www.reddit.com",netflix:"https://www.netflix.com",spotify:"https://open.spotify.com",chatgpt:"https://chatgpt.com",claude:"https://claude.ai",amazon:"https://www.amazon.in",linkedin:"https://www.linkedin.com"};
+var UN={km:["l",1000],kilometer:["l",1000],kilometers:["l",1000],kilometre:["l",1000],kilometres:["l",1000],mile:["l",1609.344],miles:["l",1609.344],mi:["l",1609.344],m:["l",1],meter:["l",1],meters:["l",1],metre:["l",1],metres:["l",1],cm:["l",.01],centimeter:["l",.01],centimeters:["l",.01],inch:["l",.0254],inches:["l",.0254],ft:["l",.3048],foot:["l",.3048],feet:["l",.3048],kg:["m",1],kilo:["m",1],kilos:["m",1],kilogram:["m",1],kilograms:["m",1],g:["m",.001],gram:["m",.001],grams:["m",.001],lb:["m",.45359237],lbs:["m",.45359237],pound:["m",.45359237],pounds:["m",.45359237],c:["t","c"],celsius:["t","c"],f:["t","f"],fahrenheit:["t","f"],l:["v",1],liter:["v",1],liters:["v",1],litre:["v",1],litres:["v",1],ml:["v",.001],gallon:["v",3.78541],gallons:["v",3.78541]};
+var WC={0:"clear sky",1:"mostly clear",2:"partly cloudy",3:"overcast",45:"foggy",48:"foggy",51:"light drizzle",53:"drizzle",55:"heavy drizzle",61:"light rain",63:"rain",65:"heavy rain",71:"light snow",73:"snow",75:"heavy snow",80:"rain showers",81:"rain showers",82:"heavy showers",95:"a thunderstorm",96:"a thunderstorm",99:"a thunderstorm"};
+function num(x){return +parseFloat(x).toPrecision(10)}
+function help(){return "I am "+name+". Offline I can: do maths and conversions, tell jokes, facts, quotes and riddles, set timers, manage your tasks, open websites, roll dice, give capitals, and explain tech topics. Online I can also check the weather ('weather in London'), define words ('define serendipity') and look up almost anything ('who is Marie Curie', 'what is a black hole'). Add an API key in Settings for full Claude AI."}
+var KB=[
+[/^(hello|hi|hey|yo|hola|good (morning|afternoon|evening))\b/,["Hello! Systems are online and ready.","Hi there. What can I do for you?","Hey! Ready when you are."]],
+[/how are you|how is it going|how are things/,["All systems nominal and ready to help. How are you?"]],
+[/who are you|your name|what are you|who made you|who created you/,function(){return "I am "+name+", your personal command center assistant. I run locally in this page, and I can use Claude AI too if you add an API key in Settings."}],
+[/plan my day|plan today|daily plan|schedule my day/,"Here is a simple structure for your day:\n1. Pick your top three priorities.\n2. Do the hardest one first, for about 90 minutes.\n3. Batch small tasks like messages into one slot.\n4. Take a 10 minute break every hour.\n5. Review and plan tomorrow in the evening.\nSay 'add task' followed by your task and I will save it."],
+[/^help$|what can you do|your commands|your abilities|what do you do/,help],
+[/thank/,["You are welcome.","Anytime.","Happy to help."]],
+[/^(bye|goodbye|see you|good night)/,["Goodbye. I will be here when you need me."]],
+[/joke|make me laugh/,JOKES],
+[/fun fact|random fact|tell me a fact|^fact$/,FACTS],
+[/quote|inspire me|motivate|motivation/,QUOTES],
+[/(i feel|i am|i'm|im) (so |very |really )?(sad|stressed|anxious|depressed|down|lonely|overwhelmed|tired)/,"I am sorry you feel that way. Try a slow breath: in for 4 seconds, hold for 4, out for 6, a few times. A short walk, some water, or talking to someone you trust can also help. If you ever feel unsafe or think about harming yourself, please contact your local emergency number or a crisis line right away."],
+[/productivity tip|how to be productive|focus tip/,["Try the Pomodoro method: 25 minutes of focused work, then a 5 minute break.","Write down your top three tasks tonight so tomorrow starts with a clear plan.","Silence notifications and keep only the one tab you need open.","Do the hardest task first, while your energy is highest."]],
+[/study tip|how to study|how to learn faster/,["Test yourself instead of rereading. Active recall beats highlighting.","Space your revision over several days instead of cramming in one night.","Teach the topic to someone else, or to an empty room. If you cannot explain it, you have found the gap.","Study in 25 minute blocks with short breaks, and sleep well before exams."]],
+[/health tip|stay healthy|healthy habit|sleep tip/,["Aim for 7 to 9 hours of sleep and keep a regular bedtime.","Drink water through the day and take a short walk after meals.","Stand up and stretch for a minute every hour if you sit a lot.","Get some daylight in the morning. It helps your sleep and mood."]],
+[/how does ai work|explain ai|what is (ai|artificial intelligence)\b/,"Artificial intelligence is software that learns patterns from large amounts of data instead of following only fixed rules. Modern AI like me uses neural networks trained on huge text collections to predict what should come next, which lets it answer questions, write, and reason about problems."],
+[/machine learning/,"Machine learning is a way of building software that learns from examples. Instead of writing every rule, you show the system lots of data and it finds the patterns, then uses them to make predictions on new data."],
+[/neural network/,"A neural network is a system of connected layers of simple math units, loosely inspired by the brain. Each connection has a weight that is adjusted during training until the network gets good at a task like recognising images or understanding text."],
+[/large language model|\bllm\b|what is chatgpt|what is claude/,"A large language model is a neural network trained on enormous amounts of text to predict the next word. Done at scale, that lets it answer questions, write, translate and write code. ChatGPT and Claude are both assistants built on large language models."],
+[/what is python|^python$/,"Python is a popular, beginner friendly programming language known for clean, readable code. It is used for web apps, data science, automation and AI."],
+[/what is html|^html$/,"HTML is the markup language that gives a web page its structure: headings, paragraphs, links, images and forms."],
+[/what is css|^css$/,"CSS is the language that styles web pages: colors, fonts, spacing, layout and animations."],
+[/what is javascript|^javascript$/,"JavaScript is the programming language of the web. It makes pages interactive, and runs in every browser."],
+[/what is an? api|^api$/,"An API is a set of rules that lets one program talk to another. For example, a weather app sends a request to a weather API and gets the forecast back."],
+[/what is the internet/,"The internet is a worldwide network of connected computers that share information using common rules called protocols. The web is just one service that runs on it."],
+[/cloud computing|what is the cloud/,"Cloud computing means using servers owned by another company over the internet, for storage and computing, instead of running everything on your own machine."],
+[/what is a database|^database$/,"A database is an organised collection of data that programs can store, search and update quickly. Examples include MySQL, PostgreSQL and MongoDB."],
+[/what is an algorithm|^algorithm$/,"An algorithm is a step by step set of instructions for solving a problem, like a recipe for a computer."],
+[/what is github|^github$/,"GitHub is a website where developers store code, track changes with Git, and collaborate. It can also host simple websites for free with GitHub Pages."],
+[/center a div|centre a div/,"In CSS, make the parent a flex container: display:flex; justify-content:center; align-items:center. That centers the div both ways."],
+[/hello world/,"Python: print('Hello, World!')\nJavaScript: console.log('Hello, World!');"],
+[/for loop/,"Python: for i in range(5): print(i)\nJavaScript: for (let i = 0; i < 5; i++) { console.log(i); }"],
+[/html template|basic html page/,"A basic page: <!DOCTYPE html><html><head><title>My Page</title></head><body><h1>Hello</h1></body></html>"],
+[/binary/,"Binary is the number system computers use, with only 0s and 1s. For example, 5 is 101 and 10 is 1010."],
+[/planets|solar system/,"The eight planets in order from the Sun are Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune."],
+[/speed of light/,"The speed of light is about 299,792 kilometres per second, or roughly 186,000 miles per second."],
+[/largest (planet)/,"Jupiter is the largest planet in our solar system."],
+[/largest ocean/,"The Pacific Ocean is the largest and deepest ocean on Earth."],
+[/tallest mountain|highest mountain/,"Mount Everest is the tallest mountain above sea level, at about 8,849 metres."],
+[/pi\b.*value|value of pi|what is pi/,"Pi is approximately 3.14159265."]
+];
+function quick(t,raw){
+var m;
+if(m=t.match(/^(?:add|create|new) (?:a |an )?(?:task|todo|to do)(?: to| called| named|:)? (.+)/)||t.match(/^remind me to (.+)/)){var tx=raw.trim().slice(raw.trim().toLowerCase().lastIndexOf(m[1]));tasks.push({t:tx.charAt(0).toUpperCase()+tx.slice(1),d:0});drawTasks();return "Added to your tasks: "+tx+"."}
+if(/^(?:show|list|read|what are|what is on|what's on)(?: me)?(?: my)? (?:tasks|todos|to do list|to do)/.test(t)||/^my tasks$/.test(t)){var o=tasks.filter(function(x){return!x.d});return o.length?"You have "+o.length+" open task"+(o.length>1?"s":"")+":\n"+o.map(function(x,i){return (i+1)+". "+x.t}).join("\n"):"Your task list is empty."}
+if(/^(?:clear|delete|remove) (?:all )?(?:my )?(?:tasks|todos)/.test(t)){tasks=[];drawTasks();return "All tasks cleared."}
+if(m=t.match(/timer (?:for )?(\d+)\s*(sec|second|min|minute|hour|hr)s?/)||t.match(/(?:in|after) (\d+)\s*(sec|second|min|minute|hour|hr)s? (?:remind|alert|wake)/)){var n=+m[1],u=m[2],ms=n*1000*(/^sec/.test(u)?1:/^min/.test(u)?60:3600),lbl=n+" "+(/^sec/.test(u)?"second":/^min/.test(u)?"minute":"hour")+(n>1?"s":"");setTimeout(function(){var z="Your timer for "+lbl+" is complete.";add("nova",z);say(z);if(navigator.vibrate)navigator.vibrate(400)},ms);return "Timer set for "+lbl+"."}
+if(m=t.match(/^(?:open|launch|go to|take me to) (.+)/)){var k=m[1].replace(/\s+/g,"").replace(/\.com$/,"");if(SITES[k]){window.open(SITES[k],"_blank");return "Opening "+k+"."}if(/\./.test(m[1])){window.open("https://"+m[1].replace(/^https?:\/\//,""),"_blank");return "Opening "+m[1]+"."}}
+if(m=t.match(/^(?:google|search(?: for| google for| the web for)?|look up) (.+)/)){window.open("https://www.google.com/search?q="+encodeURIComponent(m[1]),"_blank");return "Searching Google for "+m[1]+"."}
+if(m=t.match(/^play (.+)/)){window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(m[1]),"_blank");return "Searching YouTube for "+m[1]+"."}
+if(/\b(what('s| is)? the time|time now|current time|what time is it)\b/.test(t))return "It is "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+".";
+if(/\b(today'?s date|what('s| is)? the date|what day is it|date today|what is today|what day is today)\b/.test(t))return "Today is "+new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+".";
+if(m=t.match(/(\d+(?:\.\d+)?)\s*(?:%|percent) of (\d+(?:\.\d+)?)/))return num(m[1])+" percent of "+num(m[2])+" is "+num(m[1]*m[2]/100)+".";
+if(m=t.match(/square root of (\d+(?:\.\d+)?)/))return "The square root of "+num(m[1])+" is "+num(Math.sqrt(m[1]))+".";
+if(m=t.match(/^(?:calculate|calc|compute|solve|what is|what's|whats|how much is)?\s*([\d\s+\-*\/().x\u00d7\u00f7^]+)$/)){var e=m[1].replace(/[x\u00d7]/g,"*").replace(/\u00f7/g,"/").replace(/\^/g,"**");if(/\d/.test(e)&&/[+\-*\/]/.test(e)&&/^[\d\s+\-*\/().]+$/.test(e)){try{var r=Function('"use strict";return ('+e+')')();if(isFinite(r))return "The answer is "+num(r)+"."}catch(x){}}}
+if(m=t.match(/(-?\d+(?:\.\d+)?)\s*([a-z]+)\s+(?:to|into|in)\s+([a-z]+)/)){var a=UN[m[2]],b=UN[m[3]];if(a&&b&&a[0]===b[0]){var v=+m[1],res;if(a[0]==="t"){var c=a[1]==="c"?v:(v-32)*5/9;res=b[1]==="c"?c:c*9/5+32}else res=v*a[1]/b[1];return num(v)+" "+m[2]+" is about "+(+res.toFixed(4))+" "+m[3]+"."}}
+if(/roll (?:a )?(?:dice|die)/.test(t))return "You rolled a "+(1+Math.floor(Math.random()*6))+".";
+if(/flip a coin|coin flip|toss a coin/.test(t))return pick(["Heads.","Tails."]);
+if(m=t.match(/random number(?: between (\d+) and (\d+))?/)){var lo=m[1]?+m[1]:1,hi=m[2]?+m[2]:100;return "Your number is "+(lo+Math.floor(Math.random()*(hi-lo+1)))+"."}
+if(m=t.match(/capital (?:city )?of (?:the )?([a-z .]+)/)){var cc=CAP[m[1].trim()];if(cc)return "The capital of "+cc[0]+" is "+cc[1]+"."}
+if(/riddle/.test(t)){var rd=pick(RIDDLES);return "Riddle: "+rd[0]+"\nAnswer: "+rd[1]}
+for(var i=0;i<KB.length;i++){if(KB[i][0].test(t)){var an=KB[i][1];return typeof an==="function"?an():Array.isArray(an)?pick(an):an}}
+return null}
+async function weather(city){
+var lat,lon,place;
+if(city){var g=await (await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1")).json();if(!g.results)return "I could not find a place called "+city+".";lat=g.results[0].latitude;lon=g.results[0].longitude;place=g.results[0].name}
+else{var pos;try{pos=await new Promise(function(a,b){navigator.geolocation.getCurrentPosition(a,b,{timeout:8000})})}catch(e){return "Please allow location access, or ask me like this: weather in London."}lat=pos.coords.latitude;lon=pos.coords.longitude;place="your location"}
+var w=await (await fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,apparent_temperature,wind_speed_10m,weather_code")).json(),c=w.current;
+return "It is "+Math.round(c.temperature_2m)+"\u00b0C in "+place+", feeling like "+Math.round(c.apparent_temperature)+"\u00b0C, with "+(WC[c.weather_code]||"mixed conditions")+" and wind at "+Math.round(c.wind_speed_10m)+" km/h."}
+async function define(w){
+var d=await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/"+encodeURIComponent(w));if(!d.ok)return "I could not find a definition for "+w+".";
+var j=await d.json(),mn=j[0].meanings[0];return w+" ("+mn.partOfSpeech+"): "+mn.definitions[0].definition}
+async function wiki(q){
+var s=await (await fetch("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="+encodeURIComponent(q)+"&srlimit=1&format=json&origin=*")).json();
+var h=s.query&&s.query.search[0];if(!h)return null;
+var d=await (await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(h.title.replace(/ /g,"_")))).json();
+var x=d.extract||"";if(!x)return null;if(x.length>520)x=x.slice(0,520).replace(/\s+\S*$/,"")+"...";return x+"\n(Source: Wikipedia)"}
+async function local(raw){
+var t=raw.toLowerCase().trim().replace(/[?!.,]+$/,""),q=quick(t,raw);if(q!==null)return q;
+try{
+var m;
+if(/weather|temperature|forecast/.test(t)){var c=t.match(/\b(?:in|at|for) ([a-z .]+?)(?: today| tomorrow| now| right now)?$/);return await weather(c&&c[1])}
+if(m=t.match(/^(?:define|definition of|meaning of) (\w+)/)||t.match(/^what does (\w+) mean/))return await define(m[1]);
+if(m=t.match(/^(?:what is|what are|what was|what were|who is|who was|who are|tell me about|explain|describe|history of|where is|when was|when did) (.+)/)){var r=await wiki(m[1].replace(/^(a|an|the) /,""));if(r)return r}
+if(t.split(" ").length>1){var r2=await wiki(t);if(r2)return r2}
+}catch(e){return "I need an internet connection for that one. Offline I can still do maths, conversions, jokes, timers, tasks and more. Say help to see everything."}
+return "I do not know that one yet. Try asking me to define a word, check the weather, do a calculation, tell a joke, or ask about almost anything with 'what is' or 'who is'. Say help to see everything."}
+
+async function send(text){
+text=(text||"").trim();if(!text||busy)return;$("in").value="";
+add("user",text);
+if(!key){busy=true;state("think");var w0=add("nova","");w0.querySelector(".tx").innerHTML="<span class='dots'><span></span><span></span><span></span></span>";var out0;try{out0=await local(text)}catch(e){out0="Something went wrong with that request."}w0.querySelector(".tx").innerHTML=fmt(out0);hist.push({role:"user",content:text},{role:"assistant",content:out0});put("nova_hist",JSON.stringify(hist.slice(-40)));say(out0);busy=false;if(!(window.speechSynthesis&&speechSynthesis.speaking))state("ready");mem();$("msgs").scrollTop=1e9;return}
+busy=true;state("think");
+var w=add("nova","<span class='dots'><span></span><span></span><span></span></span>");w.querySelector(".tx").innerHTML="<span class='dots'><span></span><span></span><span></span></span>";
+hist.push({role:"user",content:text});
+try{
+var r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+body:JSON.stringify({model:model,max_tokens:1024,system:CFG.sys.replace("NOVA",name)+(mode?" Current focus area: "+mode+".":""),messages:hist.slice(-20)})});
+var d=await r.json();
+if(!r.ok)throw new Error(d.error&&d.error.message||("Error "+r.status));
+var out=d.content.map(function(c){return c.text||""}).join("");
+w.querySelector(".tx").innerHTML=fmt(out);hist.push({role:"assistant",content:out});put("nova_hist",JSON.stringify(hist.slice(-40)));say(out);
+}catch(e){hist.pop();w.querySelector(".tx").innerHTML=fmt("Connection problem: "+e.message)}
+busy=false;if(!speechSynthesis.speaking)state("ready");mem();$("msgs").scrollTop=1e9}
+
+$("snd").onclick=function(){send($("in").value)};
+$("in").onkeydown=function(e){if(e.key==="Enter")send($("in").value)};
+document.querySelectorAll(".qc").forEach(function(b){b.onclick=function(){show("chat");send(b.dataset.q)}});
+$("spk").onclick=function(){speakOn=!speakOn;put("nova_speak",speakOn?"1":"0");if(!speakOn&&window.speechSynthesis)speechSynthesis.cancel();status()};
+var rec=null;
+$("mic").onclick=function(){
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){add("nova","Voice input is not supported in this browser. Try Safari or Chrome.");return}
+if(rec){rec.stop();return}
+rec=new SR();rec.lang="en-US";rec.interimResults=false;
+rec.onresult=function(e){speakOn=true;put("nova_speak","1");status();send(e.results[0][0].transcript)};
+rec.onend=function(){rec=null;$("mic").className="mic";if(!busy)state("ready")};
+rec.onerror=function(){rec=null;$("mic").className="mic";state("ready")};
+rec.start();$("mic").className="mic rec";state("listen")};
+
+function show(p,t){
+document.querySelectorAll(".pn").forEach(function(x){x.className="pn"+(x.id==="p-"+p?" show":"")});
+document.querySelectorAll(".nav").forEach(function(n){n.classList.toggle("act",n.dataset.p===p&&(p!=="soon"||n.dataset.t===t))});
+if(p==="soon")$("sn").textContent=t}
+document.querySelectorAll(".nav").forEach(function(n){n.onclick=function(){show(n.dataset.p,n.dataset.t)}});
+$("gear").onclick=function(){show("settings")};
+$("save").onclick=function(){key=$("key").value.trim();model=$("mdl").value.trim()||CFG.model;name=$("nmi").value.trim()||CFG.name;put("nova_key",key);put("nova_model",model);put("nova_name",name);nameUI();status();show("chat");add("nova","Settings saved. Systems online.")};
+$("clr").onclick=function(){hist=[];put("nova_hist","[]");$("msgs").innerHTML="";mem();add("nova","Memory cleared. What can I do for you?");show("chat")};
+
+function drawTasks(){
+$("tl").innerHTML=tasks.map(function(t,i){return "<div class='task"+(t.d?" d":"")+"'><button data-c='"+i+"'>"+(t.d?"&#9745;":"&#9744;")+"</button><span>"+esc(t.t)+"</span><button data-x='"+i+"'>&#10005;</button></div>"}).join("")||"<p style='color:var(--m);padding:14px'>No tasks yet.</p>";
+put("nova_tasks",JSON.stringify(tasks))}
+$("ti").onkeydown=function(e){if(e.key==="Enter"&&this.value.trim()){tasks.push({t:this.value.trim(),d:0});this.value="";drawTasks()}};
+$("tl").onclick=function(e){var c=e.target.dataset.c,x=e.target.dataset.x;if(c!==undefined){tasks[c].d=tasks[c].d?0:1;drawTasks()}if(x!==undefined){tasks.splice(x,1);drawTasks()}};
+
+["Productivity","Coding","Research","Creative","Web","System"].forEach(function(c){
+var b=document.createElement("button");b.className="chip";b.textContent=c;
+b.onclick=function(){var on=b.classList.contains("act");document.querySelectorAll(".chip").forEach(function(x){x.classList.remove("act")});mode=on?"":c.toLowerCase();if(!on)b.classList.add("act")};$("chips").appendChild(b)});
+for(var i=0;i<26;i++){var w=document.createElement("i");w.style.animationDelay=(i*.07)+"s";$("wv").firstChild.appendChild(w)}
+
+function clock(){var n=new Date();$("clk").textContent=n.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",hour12:false});$("dt").textContent=n.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}
+clock();setInterval(clock,10000);
+
+var cv=$("globe"),cx=cv.getContext("2d"),pts=[],N=700,rot=0;
+for(var k=0;k<N;k++){var y=1-2*(k+.5)/N,r=Math.sqrt(1-y*y),a=k*2.399963;pts.push([Math.cos(a)*r,y,Math.sin(a)*r])}
+function globe(){cx.clearRect(0,0,420,420);rot+=.004;var R=150,c=210;
+cx.strokeStyle="#27a8ff55";cx.lineWidth=1.2;cx.beginPath();cx.ellipse(c,c,R+30,R*.35,-.4,0,7);cx.stroke();
+pts.forEach(function(p){var x=p[0]*Math.cos(rot)+p[2]*Math.sin(rot),z=-p[0]*Math.sin(rot)+p[2]*Math.cos(rot);
+cx.fillStyle="rgba(86,212,255,"+(.15+.7*(z+1)/2)+")";cx.fillRect(c+x*R,c+p[1]*R,1.8,1.8)});
+requestAnimationFrame(globe)}
+globe();
+
+nameUI();status();mem();drawTasks();$("key").value=key;$("mdl").value=model;$("nmi").value=name;
+if(hist.length){hist.slice(-6).forEach(function(m){add(m.role==="user"?"user":"nova",m.content)})}
+else add("nova",key?"Systems online. What can I do for you?":"Systems online in local mode. Ask me anything, or say help to see what I can do.");
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOVA AI</title>
+  <link rel="stylesheet" href="styles.css?v=7" />
+</head>
+<body>
+  <div id="app-root">
+    <div id="auth-view" class="view">
+      <div class="auth-shell">
+        <div class="auth-panel">
+          <div class="brand-block">
+            <div class="brand-orb"></div>
+            <div>
+              <div class="brand-title">NOVA</div>
+              <div class="brand-subtitle">AI COMMAND CENTER</div>
+            </div>
+          </div>
+
+          <div class="tab-row">
+            <button class="tab active" data-auth-tab="login">Login</button>
+            <button class="tab" data-auth-tab="register">Register</button>
+          </div>
+
+          <form id="login-form" class="auth-form active" action="javascript:void(0)" onsubmit="window.novaLogin && window.novaLogin(event); return false;" novalidate>
+            <label>
+              Email
+              <input type="email" id="login-email" required />
+            </label>
+            <label>
+              Password
+              <input type="password" id="login-password" required />
+            </label>
+            <button type="submit" class="primary-btn">Enter NOVA</button>
+          </form>
+
+          <form id="register-form" class="auth-form" action="javascript:void(0)" onsubmit="window.novaRegister && window.novaRegister(event); return false;" novalidate>
+            <label>
+              Name
+              <input type="text" id="register-name" required />
+            </label>
+            <label>
+              Email
+              <input type="email" id="register-email" required />
+            </label>
+            <label>
+              Password
+              <input type="password" id="register-password" required />
+            </label>
+            <button type="submit" class="primary-btn">Create account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboard-view" class="view hidden">
+      <div id="app" class="app-shell">
+        <header class="top box">
+          <div class="clock"><b id="clk">00:00</b><small id="dt"></small></div>
+          <div class="brand"><h1 id="nm">NOVA</h1><small>AI COMMAND CENTER</small><div class="modes">THINK / PLAN / EXECUTE</div></div>
+          <div class="tr">
+            <span class="tg">YOUR IDEAS. MY POWER.</span>
+            <span class="on" id="onl">ONLINE</span>
+            <button class="gear" id="gear" aria-label="Settings">⚙</button>
+            <button class="logout-btn" id="logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <nav class="side box">
+          <div class="core"></div>
+          <button class="nav act" data-p="chat"><i>💬</i><span>CHAT</span></button>
+          <button class="nav" data-p="tasks"><i>☑</i><span>TASKS</span></button>
+          <button class="nav" data-p="soon" data-t="FILES"><i>📁</i><span>FILES</span></button>
+          <button class="nav" data-p="soon" data-t="BROWSER"><i>🌐</i><span>BROWSER</span></button>
+          <button class="nav" data-p="soon" data-t="TOOLS"><i>🛠</i><span>TOOLS</span></button>
+          <button class="nav" data-p="settings"><i>⚙</i><span>SETTINGS</span></button>
+          <div class="sys"><b>SYSTEMS</b>ALL SYSTEMS NOMINAL</div>
+        </nav>
+
+        <main class="main box">
+          <section class="pn show" id="p-chat">
+            <canvas id="globe" width="420" height="420"></canvas>
+            <div class="head">
+              <div class="hn">
+                <div class="orb"></div>
+                <div>
+                  <h2 id="nm2">NOVA</h2>
+                  <small>AI ASSISTANT</small>
+                </div>
+              </div>
+              <div class="stbox">
+                <div id="st">READY.</div>
+                <div style="color:#4e7aa6">LISTENING / ANALYZING</div>
+              </div>
+            </div>
+            <div class="msgs" id="msgs"></div>
+            <div class="bar">
+              <button class="mic" id="mic" aria-label="Voice input">🎙</button>
+              <div class="inp">
+                <input id="in" placeholder="Give NOVA a command..." autocomplete="off" />
+                <button class="sp" id="spk" title="Spoken replies" aria-label="Spoken replies">🔊</button>
+                <button class="send" id="snd" aria-label="Send">➤</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="pn" id="p-tasks">
+            <div class="head">
+              <div class="hn">
+                <div class="orb"></div>
+                <div>
+                  <h2>TASKS</h2>
+                  <small>YOUR TO DO LIST</small>
+                </div>
+              </div>
+            </div>
+            <div class="inp"><input id="ti" placeholder="Add a task and press Enter" autocomplete="off" /></div>
+            <div class="tl" id="tl"></div>
+          </section>
+
+          <section class="pn" id="p-settings">
+            <div class="head">
+              <div class="hn">
+                <div class="orb"></div>
+                <div>
+                  <h2>SETTINGS</h2>
+                  <small>CONNECT YOUR AI</small>
+                </div>
+              </div>
+            </div>
+            <div style="overflow:auto">
+              <label class="fld">MODEL
+                <select id="model-select" class="select-input">
+                  <option value="mock-local">Local mode</option>
+                  <option value="claude-3-5-sonnet-latest">Claude Sonnet</option>
+                  <option value="gpt-4o-mini">OpenAI GPT-4o Mini</option>
+                  <option value="gemini-1.5-flash">Gemini Flash</option>
+                </select>
+              </label>
+              <label class="fld">ASSISTANT NAME<input type="text" id="nmi" /></label>
+              <p style="color:var(--m);font-size:13px;margin-bottom:16px">Choose an AI model and save preferences. Your chat history persists in the backend database.</p>
+              <button class="btn" id="save">Save</button>
+              <button class="btn g" id="clr">Clear chat memory</button>
+            </div>
+          </section>
+
+          <section class="pn" id="p-soon">
+            <div class="head">
+              <div class="hn">
+                <div class="orb"></div>
+                <div>
+                  <h2 id="sn">MODULE</h2>
+                  <small>NOT CONNECTED YET</small>
+                </div>
+              </div>
+            </div>
+            <p style="color:var(--m)">This module is a placeholder. It is ready to be connected to your own tools, files or browser automation in a later version.</p>
+          </section>
+        </main>
+
+        <aside class="right">
+          <div class="card box"><h3>⚡ QUICK COMMANDS</h3>
+            <button class="qc" data-q="What can you do?">What can you do? <span>›</span></button>
+            <button class="qc" data-q="Help me plan my day. Ask me what I need to get done.">Plan my day <span>›</span></button>
+            <button class="qc" data-q="Explain how AI works in simple words.">Explain AI <span>›</span></button>
+          </div>
+          <div class="card box"><h3>⚡ SYSTEM STATUS</h3>
+            <div class="row">AI CORE<span id="s1" class="ok">ONLINE</span></div>
+            <div class="row">VOICE INPUT<span id="s2" class="ok">READY</span></div>
+            <div class="row">VOICE REPLY<span id="s3" class="sb">OFF</span></div>
+            <div class="row">TOOLS<span class="sb">STANDBY</span></div>
+          </div>
+          <div class="card box quote">"Ideas become reality the moment you act on them."<b>NOVA</b></div>
+        </aside>
+
+        <footer class="bot box">
+          <div class="mem"><small>MEMORY <span id="mp">0%</span></small><div><i id="mb"></i></div></div>
+          <div class="chips" id="chips"></div>
+          <div class="wv" id="wv"><div></div><span id="wl">STANDBY</span></div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=7"></script>
+</body>
+</html>
